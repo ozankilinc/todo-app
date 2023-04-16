@@ -1,21 +1,102 @@
 version: '3.7'
 services:
-  todo-couchbase:
-    container_name: todo-couchbase
-    build: user/
+  db:
+    container_name: couchbaseservice
+    build:
+      context: couchbase/.
+    image: couchbaseservice:latest
+    restart: always
     ports:
       - 8091:8091
       - 8092:8092
       - 8093:8093
       - 8094:8094
       - 11210:11210
-    environment:
-      COUCHBASE_ADMINISTRATOR_USERNAME: Administrator
-      COUCHBASE_ADMINISTRATOR_PASSWORD: password
-      COUCHBASE_BUCKET: todo-user
-      COUCHBASE_BUCKET_PASSWORD: password
     networks:
       - spring-todo-app-network
+
+  eurekaserver:
+    container_name: eurekaserver
+    build:
+      context: eurekaserver/.
+    image: eurekaserver:latest
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: eurekaserver
+    ports:
+      - 8070:8070
+    networks:
+      - spring-todo-app-network
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  gatewayserver:
+    container_name: gatewayserver
+    build:
+      context: gatewayserver/.
+    image: gatewayserver:latest
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: eurekaserver
+    ports:
+      - 8072:8072
+    networks:
+      - spring-todo-app-network
+    depends_on:
+      - eurekaserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  userservice:
+    container_name: userservice
+    build:
+      context: user/.
+    image: userservice:latest
+    environment:
+      COUCH_BASE_CONNECTION: db
+      EUREKA_INSTANCE_HOSTNAME: eurekaserver
+    ports:
+      - 8081:8081
+    networks:
+      - spring-todo-app-network
+    depends_on:
+      - eurekaserver
+      - db
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  todoservice:
+    container_name: todoservice
+    build:
+      context: todo/.
+    image: todoservice:latest
+    environment:
+      COUCH_BASE_CONNECTION: db
+      EUREKA_INSTANCE_HOSTNAME: eurekaserver
+    ports:
+      - 8082:8082
+    networks:
+      - spring-todo-app-network
+    depends_on:
+      - eurekaserver
+      - db
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
 networks:
   spring-todo-app-network:
     driver: bridge

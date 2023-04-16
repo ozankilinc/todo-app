@@ -3,6 +3,7 @@ package com.todo.app.userservice.filter;
 import com.todo.app.userservice.helper.JWTHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @Component
+@ConditionalOnProperty(name = "unittest", havingValue = "false", matchIfMissing = true)
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationFilter extends OncePerRequestFilter {

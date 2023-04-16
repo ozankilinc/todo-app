@@ -1,5 +1,5 @@
-FROM couchbase
+FROM openjdk:8
 
-COPY configure-node.sh /opt/couchbase
+COPY target/*.jar userservice.jar
 
-CMD ["/opt/couchbase/configure-node.sh"]
+ENTRYPOINT ["java","-jar","/userservice.jar"]

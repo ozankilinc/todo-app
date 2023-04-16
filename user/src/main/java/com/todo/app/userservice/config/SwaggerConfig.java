@@ -1,5 +1,6 @@
 package com.todo.app.userservice.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -7,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Collections;
 
 @Configuration
+@ConditionalOnProperty(name = "unittest", havingValue = "false", matchIfMissing = true)
 //@EnableSwagger2
 public class SwaggerConfig {
 /*
